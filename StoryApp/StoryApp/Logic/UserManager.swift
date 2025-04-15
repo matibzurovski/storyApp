@@ -24,7 +24,6 @@ class UserManager {
 		do {
 			let data = try Data(contentsOf: url)
 			let decoder = JSONDecoder()
-			decoder.keyDecodingStrategy = .convertFromSnakeCase
 			let response = try decoder.decode(UserResponse.self, from: data)
 			self.users = response.pages.flatMap { $0.users }
 		} catch {

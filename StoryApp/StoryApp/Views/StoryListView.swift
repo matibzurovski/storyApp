@@ -23,23 +23,38 @@ struct StoryListView: View {
 		.padding(12)
 		.frame(maxWidth: .infinity)
 		.background(Color.black)
+		.sheet(item: $viewModel.storyDetails) { story in
+			StoryView(viewModel: viewModel, story: story)
+		}
 	}
 	
 	private var carousel: some View {
 		ScrollView(.horizontal, showsIndicators: false) {
-			HStack(spacing: 12) {
+			LazyHStack(spacing: 12) {
 				ForEach(viewModel.stories) { story in
 					Button {
-						
+						viewModel.onStoryTapped(story: story)
 					} label: {
 						StoryBubbleView(story: story)
 					}
 					.padding(.vertical, 4)
+					.onAppear {
+						viewModel.onStoryAppear(story: story)
+					}
 				}
+				
+				if viewModel.isDownloadingMore {
+					ProgressView()
+						.tint(.white)
+				}
+					
 			}
+			.frame(maxHeight: 50)
 			.padding(.horizontal, 20)
 		}
 	}
+	
+	
 }
 
 extension StoryListView {

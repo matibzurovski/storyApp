@@ -6,5 +6,9 @@
 //
 
 enum Constants {
-	static let pageSize = 10
+	/// Amount of elements in each story page size
+	static let storyPageSize = 20
+	
+	/// Amount of items before the last one in which we should trigger next page loading.
+	static let nextPageThreshold = 3
 }

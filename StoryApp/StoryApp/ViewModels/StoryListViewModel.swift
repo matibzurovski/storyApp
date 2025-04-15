@@ -8,28 +8,88 @@
 import Foundation
 
 @Observable
-class StoryListViewModel: @unchecked Sendable {
+class StoryListViewModel {
 	var stories: [Story] = []
+	var isDownloadingMore = false
+	var storyDetails: Story?
+	
 	let userManager: UserManager = .init()
+	
+	private let storageKey = "Stories"
 	
 	init() {
 		loadPersistedStories()
+		if stories.isEmpty {
+			// First run of the app
+			downloadMoreStories(shouldDelay: false)
+		}
+	}
+	
+	func onStoryAppear(story: Story) {
+		guard !isDownloadingMore else { return }
+		
+		guard let index = stories.firstIndex(of: story) else {
+			return
+		}
+		
+		guard (stories.count - index) <= Constants.nextPageThreshold else {
+			return
+		}
+		
+		downloadMoreStories()
+	}
+	
+	func onStoryTapped(story: Story) {
+		storyDetails = story
+	}
+	
+	/// Updates the story with the given id on the in-memory list, and also in local storage
+	func update(_ story: Story) {
+		if let index = stories.firstIndex(where: { $0.id == story.id }) {
+			stories[index] = story
+			persistStories()
+		}
+	}
+	
+	func markAsSeen(story: Story) {
+		if let index = stories.firstIndex(of: story) {
+			stories[index].isSeen = true
+			persistStories()
+		}
+	}
+}
+
+// MARK: - Persistence
+// Note: Initial version stores the stories on UserDefaults. This should be migrated into a more scalable solution (such as CoreData)
+extension StoryListViewModel {
+	private func persistStories() {
+		if let data = try? JSONEncoder().encode(stories) {
+			UserDefaults.standard.set(data, forKey: storageKey)
+		}
 	}
 	
 	private func loadPersistedStories() {
-		// Load stories downloaded on previous sessions
-		
-		if stories.isEmpty {
-			// First time using the app
-			downloadMoreStories()
+		if let data = UserDefaults.standard.data(forKey: storageKey),
+		   let saved = try? JSONDecoder().decode([Story].self, from: data) {
+			self.stories = saved
 		}
-		
 	}
-	
-	private func downloadMoreStories() {
-		let newStories = (0..<Constants.pageSize).map { _ in
-			Story.buildRandom(creator: userManager.getRandomUser())
+}
+
+// MARK: - Helpers
+private extension StoryListViewModel {
+	/// Simulates the dowload of more stories, with a delay of 1.5 seconds if `shouldDelay: true`
+	 func downloadMoreStories(shouldDelay: Bool = true) {
+		isDownloadingMore = true
+		DispatchQueue.main.asyncAfter(deadline: .now() + (shouldDelay ? 1.5 : 0)) { [weak self] in
+			guard let self else { return }
+			let newStories = (0..<Constants.storyPageSize).map { _ in
+				Story.buildRandom(creator: self.userManager.getRandomUser())
+			}
+			self.stories.append(contentsOf: newStories)
+			persistStories()
+			self.isDownloadingMore = false
 		}
-		stories.append(contentsOf: newStories)
+		
 	}
 }
