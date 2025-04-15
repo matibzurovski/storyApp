@@ -10,8 +10,9 @@ import SwiftUI
 /// A view showing the detail of a Story.
 /// It also interacts with the `StoryListViewModel` since it needs to update its like/seen status.
 struct StoryView: View {
-	@Bindable var viewModel: StoryListViewModel
 	@State private(set) var story: Story
+	@Bindable var viewModel: StoryListViewModel
+	let isActive: Bool
 	
 	var body: some View {
 		VStack(spacing: 8) {
@@ -39,9 +40,14 @@ struct StoryView: View {
 			.foregroundStyle(story.isLiked ? .red : .white)
 		}
 		.background(.black)
-		.onAppear {
-			story.isSeen = true
-			viewModel.update(story)
+		.onChange(of: isActive) { _, newValue in
+			// We need to do this custom solution because if we used `onAppear()`, it would be called before actually showing up
+			// due to the way the `TabView` (inside `StoryCarouselView`) works.
+			if newValue, !story.isSeen {
+				story.isSeen = true
+				viewModel.update(story)
+			}
 		}
 	}
 }
+

@@ -7,11 +7,18 @@
 
 import Foundation
 
+/// A view model holding the logic for everything related to stories.
+/// This includes logic to read and write data from local storage, as well
+/// as the logic to simulate a remote download of more stories.
+///
+/// Given the stories status can be modified from different places (`FeedView`,
+/// `StoryCarouselView` & `StoryView`), this view model must be shared across such screens.
 @Observable
 class StoryListViewModel {
 	var stories: [Story] = []
 	var isDownloadingMore = false
-	var storyDetails: Story?
+	var selectedIndex = 0
+	var showCarousel = false
 	
 	let userManager: UserManager = .init()
 	
@@ -19,6 +26,7 @@ class StoryListViewModel {
 	
 	init() {
 		loadPersistedStories()
+		
 		if stories.isEmpty {
 			// First run of the app
 			downloadMoreStories(shouldDelay: false)
@@ -40,7 +48,15 @@ class StoryListViewModel {
 	}
 	
 	func onStoryTapped(story: Story) {
-		storyDetails = story
+		if let index = stories.firstIndex(of: story) {
+			selectedIndex = index
+			showCarousel = true
+			
+			// Manually set as seen (since `StoryCarouselView` won't set the first one).
+			var updated = story
+			updated.isSeen = true
+			update(updated)
+		}
 	}
 	
 	/// Updates the story with the given id on the in-memory list, and also in local storage
@@ -50,24 +66,20 @@ class StoryListViewModel {
 			persistStories()
 		}
 	}
-	
-	func markAsSeen(story: Story) {
-		if let index = stories.firstIndex(of: story) {
-			stories[index].isSeen = true
-			persistStories()
-		}
-	}
 }
 
 // MARK: - Persistence
 // Note: Initial version stores the stories on UserDefaults. This should be migrated into a more scalable solution (such as CoreData)
 extension StoryListViewModel {
+	
+	/// Persists the stories to UserDefaults
 	private func persistStories() {
 		if let data = try? JSONEncoder().encode(stories) {
 			UserDefaults.standard.set(data, forKey: storageKey)
 		}
 	}
 	
+	/// Reads stories from UserDefaults
 	private func loadPersistedStories() {
 		if let data = UserDefaults.standard.data(forKey: storageKey),
 		   let saved = try? JSONDecoder().decode([Story].self, from: data) {
@@ -79,7 +91,7 @@ extension StoryListViewModel {
 // MARK: - Helpers
 private extension StoryListViewModel {
 	/// Simulates the dowload of more stories, with a delay of 1.5 seconds if `shouldDelay: true`
-	 func downloadMoreStories(shouldDelay: Bool = true) {
+	func downloadMoreStories(shouldDelay: Bool = true) {
 		isDownloadingMore = true
 		DispatchQueue.main.asyncAfter(deadline: .now() + (shouldDelay ? 1.5 : 0)) { [weak self] in
 			guard let self else { return }

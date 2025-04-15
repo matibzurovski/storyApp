@@ -15,9 +15,9 @@ struct FeedView: View {
 	
 	var body: some View {
 		VStack {
-			carousel
+			stories
 			Spacer()
-			Text("Here we would show rest of the content unrelated to stories")
+			Text("Here we would show rest of the Instagram feed")
 				.foregroundStyle(.white)
 				.padding()
 			Spacer()
@@ -26,12 +26,12 @@ struct FeedView: View {
 		.padding(12)
 		.frame(maxWidth: .infinity)
 		.background(Color.black)
-		.sheet(item: $viewModel.storyDetails) { story in
-			StoryView(viewModel: viewModel, story: story)
+		.sheet(isPresented: $viewModel.showCarousel) {
+			StoryCarouselView(viewModel: viewModel, selectedIndex: $viewModel.selectedIndex)
 		}
 	}
 	
-	private var carousel: some View {
+	private var stories: some View {
 		ScrollView(.horizontal, showsIndicators: false) {
 			LazyHStack(spacing: 12) {
 				ForEach(viewModel.stories) { story in
