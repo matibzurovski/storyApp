@@ -19,7 +19,7 @@ This app includes a simplified version of Instagram Stories with the following v
   - Supports swipe-down-to-dismiss gesture.
   
 - **`StoryView`**
-  - Displays individual story content (image).
+  - Displays individual story content (image) and info about its creator (name and image).
   - Includes **like/unlike** functionality.
 
 All views are powered by a shared **MVVM-style `StoryListViewModel`**, which manages the story data and user interactions consistently across the app.
@@ -50,5 +50,5 @@ All views are powered by a shared **MVVM-style `StoryListViewModel`**, which man
 - ✅ Stories and their state are persisted via `UserDefaults`, which works well for small-scale testing. However, this could be replaced with a more robust solution like **`CoreData`** or **`Realm`**.
 - 🚫 When navigating through stories in `StoryCarouselView`, new stories are **not generated on-the-fly** as they are in the feed. The user must exit and scroll the feed to trigger new content generation. This could be improved by integrating infinite scroll into the carousel as well.
 - 👥 Story grouping by user (as Instagram does) is not implemented, to keep the scope focused and the UI logic simple.
-
+- ♻️ Create an `AvatarView` that takes a `User` and returns a circular image view (used in `FeedView` as well as in `StoryView`)
 

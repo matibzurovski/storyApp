@@ -27,5 +27,10 @@ extension Story {
 			isLiked: false
 		)
 	}
+	
+	var creatorImageUrl: URL? {
+		guard let urlString = creator.profilePictureUrl else { return nil }
+		return URL(string: urlString)
+	}
 }
 

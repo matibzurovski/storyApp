@@ -78,7 +78,7 @@ extension FeedView {
 		}
 		
 		private var image: some View {
-			AsyncImage(url: story.bubbleImageUrl) { phase in
+			AsyncImage(url: story.creatorImageUrl) { phase in
 				switch phase {
 				case .empty, .failure:
 					Circle()
@@ -103,11 +103,6 @@ extension FeedView {
 }
 
 private extension Story {
-	var bubbleImageUrl: URL? {
-		guard let urlString = creator.profilePictureUrl else { return nil }
-		return URL(string: urlString)
-	}
-	
 	var gradientColors: [Color] {
 		if isSeen {
 			[.gray]
