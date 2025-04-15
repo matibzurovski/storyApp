@@ -1,5 +1,5 @@
 //
-//  StoryListView.swift
+//  HomeView.swift
 //  StoryApp
 //
 //  Created by Matias Bzurovski on 15/04/2025.
@@ -7,7 +7,10 @@
 
 import SwiftUI
 
-struct StoryListView: View {
+/// A view that mimics Instagram Feed View.
+/// On the top, it will display an infinite number of stories. When one of them is tapped,
+/// the StoryView will be presented.
+struct FeedView: View {
 	@State private(set) var viewModel: StoryListViewModel
 	
 	var body: some View {
@@ -57,7 +60,7 @@ struct StoryListView: View {
 	
 }
 
-extension StoryListView {
+extension FeedView {
 	struct StoryBubbleView: View {
 		let story: Story
 		
@@ -115,5 +118,5 @@ private extension Story {
 }
 
 #Preview {
-	StoryListView(viewModel: .init())
+	FeedView(viewModel: .init())
 }

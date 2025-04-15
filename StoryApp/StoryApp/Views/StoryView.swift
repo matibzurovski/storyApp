@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+/// A view showing the detail of a Story.
+/// It also interacts with the `StoryListViewModel` since it needs to update its like/seen status.
 struct StoryView: View {
 	@Bindable var viewModel: StoryListViewModel
 	@State private(set) var story: Story
